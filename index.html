@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz de Ecuaciones Diferenciales</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 15px;
+            color: white;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+        }
+
+        .question-container {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+        }
+
+        .question {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .equation {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 1.5em;
+            text-align: center;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            color: #764ba2;
+            font-weight: bold;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .option {
+            background: white;
+            border: 3px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+        }
+
+        .option:hover {
+            transform: translateX(10px);
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .option.correct {
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            color: white;
+            border-color: #4caf50;
+        }
+
+        .option.incorrect {
+            background: linear-gradient(135deg, #f44336 0%, #da190b 100%);
+            color: white;
+            border-color: #f44336;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.1em;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .final-screen {
+            text-align: center;
+            display: none;
+        }
+
+        .final-screen.show {
+            display: block;
+        }
+
+        .final-score {
+            font-size: 4em;
+            color: #667eea;
+            margin: 20px 0;
+        }
+
+        .restart-btn, .share-btn {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .share-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .restart-btn:hover, .share-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .share-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .share-box.show {
+            display: block;
+        }
+
+        .share-text {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.8em;
+            word-break: break-all;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .copy-msg {
+            color: #4caf50;
+            font-weight: bold;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .copy-msg.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 Quiz de Ecuaciones Diferenciales</h1>
+        <p class="subtitle">Ecuaciones Homogéneas y Coeficientes Lineales</p>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="score">0</div>
+                <div class="stat-label">Puntos</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="timer">30</div>
+                <div class="stat-label">Segundos</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="question-num">1</div>
+                <div class="stat-label">de 10</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="correct">0</div>
+                <div class="stat-label">Correctas</div>
+            </div>
+        </div>
+
+        <div id="game-content">
+            <div class="question-container">
+                <div class="question" id="question-text"></div>
+                <div class="equation" id="equation"></div>
+                <div class="options" id="options"></div>
+            </div>
+            <div class="feedback" id="feedback"></div>
+        </div>
+
+        <div class="final-screen" id="final-screen">
+            <h2>🎉 ¡Juego Terminado!</h2>
+            <div class="final-score" id="final-score"></div>
+            <p id="final-message"></p>
+            <button class="restart-btn" onclick="restartGame()">🔄 Jugar de Nuevo</button>
+            <button class="share-btn" onclick="shareQuiz()">🔗 Compartir Quiz</button>
+            <div class="share-box" id="share-box">
+                <p style="margin-bottom: 10px; color: #667eea; font-weight: bold;">Comparte este link:</p>
+                <div class="share-text" id="share-text"></div>
+                <button class="restart-btn" onclick="copyShareLink()" style="width: 100%; margin-top: 10px;">📋 Copiar Link</button>
+                <div class="copy-msg" id="copy-msg">✅ ¡Link copiado!</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const allQuestions = [
+            {
+                question: "¿Qué tipo de ecuación diferencial es la siguiente?",
+                equation: "dy/dx = (x + y) / (x - y)",
+                correctAnswer: "Ecuación homogénea",
+                wrongAnswers: ["Ecuación lineal", "Ecuación separable", "Ecuación exacta"],
+                explanation: "Es homogénea porque puede expresarse como y' = f(y/x)"
+            },
+            {
+                question: "Resuelve: dy/dx + 2y = 0",
+                equation: "dy/dx + 2y = 0",
+                correctAnswer: "y = Ce^(-2x)",
+                wrongAnswers: ["y = Ce^(2x)", "y = C + 2x", "y = 2Ce^x"],
+                explanation: "Es una ecuación lineal homogénea"
+            },
+            {
+                question: "¿Cuál es el factor integrante de: dy/dx + 3y = 6x?",
+                equation: "dy/dx + 3y = 6x",
+                correctAnswer: "e^(3x)",
+                wrongAnswers: ["e^(-3x)", "3x", "e^(6x)"],
+                explanation: "El factor integrante es e^(3x)"
+            },
+            {
+                question: "Identifica el tipo de ecuación:",
+                equation: "x²dy/dx = y² + xy",
+                correctAnswer: "Ecuación homogénea",
+                wrongAnswers: ["Ecuación de Bernoulli", "Ecuación lineal", "Ecuación de Clairaut"],
+                explanation: "Es homogénea de grado 2"
+            },
+            {
+                question: "Solución de: dy/dx - y = 0",
+                equation: "dy/dx - y = 0",
+                correctAnswer: "y = Ce^x",
+                wrongAnswers: ["y = Ce^(-x)", "y = Cx", "y = C"],
+                explanation: "Solución: y = Ce^x"
+            },
+            {
+                question: "¿Cuál es la solución general de: dy/dx + y/x = 0?",
+                equation: "dy/dx + y/x = 0",
+                correctAnswer: "y = C/x",
+                wrongAnswers: ["y = Cx", "y = Ce^x", "y = C"],
+                explanation: "Por separación de variables: y = C/x"
+            },
+            {
+                question: "Para y'' + y = 0, la solución general es:",
+                equation: "y'' + y = 0",
+                correctAnswer: "y = C₁cos(x) + C₂sen(x)",
+                wrongAnswers: ["y = C₁e^x + C₂e^(-x)", "y = C₁x + C₂", "y = C₁cos(x)"],
+                explanation: "Raíces complejas: ±i"
+            },
+            {
+                question: "¿Qué tipo de ecuación es: dy/dx = y²?",
+                equation: "dy/dx = y²",
+                correctAnswer: "Ecuación de Bernoulli",
+                wrongAnswers: ["Ecuación lineal", "Ecuación homogénea", "Ecuación exacta"],
+                explanation: "Bernoulli con n = 2"
+            },
+            {
+                question: "Solución de: dy/dx + 4y = 0, con y(0) = 2",
+                equation: "dy/dx + 4y = 0, y(0) = 2",
+                correctAnswer: "y = 2e^(-4x)",
+                wrongAnswers: ["y = 2e^(4x)", "y = 4e^(-2x)", "y = e^(-4x) + 2"],
+                explanation: "Con condición inicial y(0) = 2"
+            },
+            {
+                question: "Una ecuación diferencial es lineal si:",
+                equation: "Definición de linealidad",
+                correctAnswer: "La variable dependiente aparece de forma lineal",
+                wrongAnswers: ["Tiene solución única", "Es de primer orden", "Tiene coeficientes constantes"],
+                explanation: "y y sus derivadas no están elevadas a potencias"
+            }
+        ];
+
+        let questions = [];
+        let currentQuestion = 0;
+        let score = 0;
+        let correctAnswers = 0;
+        let answered = false;
+        let timeLeft = 30;
+        let timerInterval;
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function prepareQuestions() {
+            const shuffled = shuffleArray(allQuestions);
+            questions = shuffled.slice(0, 10).map(q => {
+                const allOptions = [q.correctAnswer, ...q.wrongAnswers];
+                const shuffledOptions = shuffleArray(allOptions);
+                return {
+                    ...q,
+                    options: shuffledOptions,
+                    correct: shuffledOptions.indexOf(q.correctAnswer)
+                };
+            });
+        }
+
+        function startTimer() {
+            timeLeft = 30;
+            document.getElementById('timer').textContent = timeLeft;
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timeOut();
+                }
+            }, 1000);
+        }
+
+        function timeOut() {
+            if (answered) return;
+            answered = true;
+            const q = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            const feedback = document.getElementById('feedback');
+            
+            options[q.correct].classList.add('correct');
+            options.forEach(opt => opt.style.pointerEvents = 'none');
+            
+            feedback.textContent = '⏰ Tiempo agotado - ' + q.explanation;
+            feedback.style.background = '#fff3cd';
+            feedback.classList.add('show');
+            
+            setTimeout(() => {
+                if (currentQuestion < questions.length - 1) {
+                    currentQuestion++;
+                    loadQuestion();
+                } else {
+                    showFinalScreen();
+                }
+            }, 2500);
+        }
+
+        function loadQuestion() {
+            answered = false;
+            const q = questions[currentQuestion];
+            document.getElementById('question-text').textContent = q.question;
+            document.getElementById('equation').textContent = q.equation;
+            document.getElementById('question-num').textContent = currentQuestion + 1;
+            document.getElementById('feedback').classList.remove('show');
+
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+
+            q.options.forEach((option, index) => {
+                const div = document.createElement('div');
+                div.className = 'option';
+                div.textContent = option;
+                div.onclick = () => checkAnswer(index);
+                optionsContainer.appendChild(div);
+            });
+
+            startTimer();
+        }
+
+        function checkAnswer(selected) {
+            if (answered) return;
+            answered = true;
+            clearInterval(timerInterval);
+
+            const q = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            const feedback = document.getElementById('feedback');
+
+            options[selected].classList.add(selected === q.correct ? 'correct' : 'incorrect');
+            if (selected !== q.correct) {
+                options[q.correct].classList.add('correct');
+            }
+
+            if (selected === q.correct) {
+                const bonus = Math.floor(timeLeft / 3);
+                const points = 10 + bonus;
+                score += points;
+                correctAnswers++;
+                feedback.textContent = `✅ ¡Correcto! +${points} puntos - ${q.explanation}`;
+                feedback.style.background = '#d4edda';
+                document.getElementById('score').textContent = score;
+                document.getElementById('correct').textContent = correctAnswers;
+            } else {
+                feedback.textContent = '❌ Incorrecto - ' + q.explanation;
+                feedback.style.background = '#f8d7da';
+            }
+
+            feedback.classList.add('show');
+            options.forEach(opt => opt.style.pointerEvents = 'none');
+
+            setTimeout(() => {
+                if (currentQuestion < questions.length - 1) {
+                    currentQuestion++;
+                    loadQuestion();
+                } else {
+                    showFinalScreen();
+                }
+            }, 2500);
+        }
+
+        function showFinalScreen() {
+            clearInterval(timerInterval);
+            document.getElementById('game-content').style.display = 'none';
+            document.getElementById('final-screen').classList.add('show');
+            
+            document.getElementById('final-score').textContent = score + ' / 200';
+
+            const percentage = (correctAnswers / questions.length) * 100;
+            let message = '';
+            if (percentage === 100) message = '¡Perfecto! Dominas las ecuaciones 🏆';
+            else if (percentage >= 70) message = '¡Excelente trabajo! 👏';
+            else if (percentage >= 50) message = 'Bien hecho, sigue practicando 📚';
+            else message = 'Sigue estudiando, ¡tú puedes! 💪';
+            
+            document.getElementById('final-message').textContent = message;
+        }
+
+        function shareQuiz() {
+            const shareBox = document.getElementById('share-box');
+            const shareText = document.getElementById('share-text');
+            
+            shareBox.classList.toggle('show');
+            
+            if (shareBox.classList.contains('show')) {
+                shareText.textContent = window.location.href;
+            }
+        }
+
+        function copyShareLink() {
+            const shareText = document.getElementById('share-text').textContent;
+            navigator.clipboard.writeText(shareText).then(() => {
+                const msg = document.getElementById('copy-msg');
+                msg.classList.add('show');
+                setTimeout(() => msg.classList.remove('show'), 2000);
+            });
+        }
+
+        function restartGame() {
+            currentQuestion = 0;
+            score = 0;
+            correctAnswers = 0;
+            clearInterval(timerInterval);
+            prepareQuestions();
+            document.getElementById('game-content').style.display = 'block';
+            document.getElementById('final-screen').classList.remove('show');
+            document.getElementById('share-box').classList.remove('show');
+            document.getElementById('score').textContent = '0';
+            document.getElementById('correct').textContent = '0';
+            loadQuestion();
+        }
+
+        prepareQuestions();
+        loadQuestion();
+    </script>
+</body>
+</html>
